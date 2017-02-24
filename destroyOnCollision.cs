@@ -17,7 +17,7 @@ public class destroyOnCollision : MonoBehaviour {
 			audioToPlay [randomIndex].Play ();
 			Debug.Log (randomIndex);
 		} catch(Exception e) {
-			throw new Exception ("Please add Audio Source or refer to manual for ... " + e.ToString());
+			throw new Exception ("Please add Audio Source" + e.ToString());
 		}
 	}
 
