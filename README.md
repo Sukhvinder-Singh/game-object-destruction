@@ -1,6 +1,7 @@
 # game-object-destruction
 Unity 3-D script to make destructible game objects that gets destroyed on collision.
-
+# Full asset link to the asset store:
+<a href="https://www.assetstore.unity3d.com/en/#!/content/86377">https://www.assetstore.unity3d.com/en/#!/content/86377</a>
 # Features:
 This script can be used to make destructable game objects consiting of more than one rigidbodies. For example any game object you want to make destructable such as street lights, chairs etc. <br><br>
 Attach this script to any game object and this script will first initially set all rigidbodies as kinematic so they do not interact with physics untill and unless a collision with them occurs. On collision, rigidbodies are un-set as kinematic and they start interacting with physics. <br><br>
