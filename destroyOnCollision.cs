@@ -1,27 +1,54 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 
-public class destroyOnCollision : MonoBehaviour {
 
-	public int minVelocityToDestroy; /* minimum relative velocity for destruction to occur on collision */
-	Component [] streetComponent; /* array of rigidbodies in the game object */
-	public AudioSource[] audioToPlay; /*array of audio sources to play for impact sound effects */
-	int randomIndex; /* random index number of audio source to play */
+[System.Serializable]
+public class uniqueEffects {
+	
+	bool hasPlayed = false; 
+	public Transform effectTransform; 
+	public GameObject playEffect; 
+	public AudioSource playSound; 
 
-	/* play random sounds on collision for fun ;-) */
-	void playAudio() {
-		randomIndex = UnityEngine.Random.Range(0,audioToPlay.Length); /* randomly pick a audio source */
-		/* there must be atleast one audio source */
+	
+	public bool getPlayedStatus() {
+		return hasPlayed;
+	}
+
+	
+	public void setPlayedStatus() {
+		hasPlayed = true;
+	}
+}
+
+public class CollisionDestroy : MonoBehaviour {
+
+	int i; // loop variable
+	static bool playNow = false; 
+	Component [] streetComponent; 
+	int randomIndex; 
+	public int minVelocityToDestroy; 
+	public uniqueEffects[] effects;
+	public AudioSource[] defaultAudioToPlay;
+	public GameObject[] destroyObjects; 
+	Collider triggerComponent; 
+
+	
+	public void playAudio() {
+		randomIndex = UnityEngine.Random.Range(0,defaultAudioToPlay.Length); 
+
+		
 		try {
-			audioToPlay [randomIndex].Play ();
-			Debug.Log (randomIndex);
+			defaultAudioToPlay [randomIndex].playOnAwake=false; 
+			defaultAudioToPlay [randomIndex].Play(); 
+			//Debug.Log (randomIndex);
 		} catch(Exception e) {
 			throw new Exception ("Please add Audio Source" + e.ToString());
 		}
 	}
 
-	/* initially set all rigidbodies as kinematic */
+	
 	void setStatic() {
 		foreach(Rigidbody rigid in streetComponent) {
 			rigid.isKinematic = true;
@@ -29,25 +56,46 @@ public class destroyOnCollision : MonoBehaviour {
 		}
 	}
 
-	/* set all kinematic rigidbodies as non-kinematic on a collision*/
+	
 	void destroyIfCollision() {
 		foreach(Rigidbody rigid in streetComponent) {
 			rigid.isKinematic = false;
 			rigid.detectCollisions = true;
 		}
+		playNow = true;
+		triggerComponent = GetComponent<Collider> ();
+		triggerComponent.enabled = false; 
 	}
 
-	/* initialize */
+	
 	void Start () {
 		streetComponent = GetComponentsInChildren (typeof(Rigidbody));
 		setStatic ();
 	}
 
-	/* called on trigger enter */
-	void OnTriggerEnter(Collider other) {
-		playAudio (); /* play sound on collision */
-		if (other.attachedRigidbody.velocity.magnitude > minVelocityToDestroy) /* destruct object on a minimum velocity of collider */
-			destroyIfCollision ();
-	}
 
+	
+	void OnTriggerEnter(Collider other) {
+		if(playNow)	
+		playAudio ();
+		
+		if (other.attachedRigidbody.velocity.magnitude > minVelocityToDestroy) {
+			destroyIfCollision ();
+			for(i=0;i<effects.Length;i++) {
+				if(effects[i].getPlayedStatus()==false) {
+					effects [i].setPlayedStatus ();
+					
+					Instantiate (effects[i].playEffect, effects[i].effectTransform.transform.position, effects[i].effectTransform.transform.rotation);
+					effects[i].playSound.Play ();
+				}
+			}
+			
+			for(i=0;i<destroyObjects.Length;i++) {
+				Destroy (destroyObjects[i]);
+			}
+		} 
+	}
 }
+
+
+
